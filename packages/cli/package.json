@@ -19,6 +19,7 @@
     "@chopus/shared": "workspace:*",
     "@opentui/core": "^0.4.4",
     "@opentui/react": "^0.4.4",
+    "date-fns": "^4.4.0",
     "eventsource-parser": "^3.0.6",
     "hono": "^4.12.12",
     "opentui-spinner": "^0.0.7",
