@@ -3,7 +3,7 @@ export type ModelPricing = {
   outputUsdPerMillionTokens: number;
 };
 
-export type SupportedProvider = "anthropic" | "openai";
+export type SupportedProvider = "anthropic" | "openai" | "google";
 
 type SupportedChatModelDefinition = {
   id: string;
@@ -12,6 +12,47 @@ type SupportedChatModelDefinition = {
 };
 
 export const SUPPORTED_CHAT_MODELS = [
+  {
+    // Free-tier friendly default for local testing (Google AI Studio).
+    id: "gemini-flash-latest",
+    provider: "google",
+    pricing: {
+      inputUsdPerMillionTokens: 0,
+      outputUsdPerMillionTokens: 0,
+    },
+  },
+  {
+    id: "gemini-2.0-flash-lite",
+    provider: "google",
+    pricing: {
+      inputUsdPerMillionTokens: 0,
+      outputUsdPerMillionTokens: 0,
+    },
+  },
+  {
+    id: "gemini-2.5-flash",
+    provider: "google",
+    pricing: {
+      inputUsdPerMillionTokens: 0,
+      outputUsdPerMillionTokens: 0,
+    },
+  },
+  {
+    id: "gemini-2.0-flash",
+    provider: "google",
+    pricing: {
+      inputUsdPerMillionTokens: 0,
+      outputUsdPerMillionTokens: 0,
+    },
+  },
+  {
+    id: "gemini-2.5-flash-lite",
+    provider: "google",
+    pricing: {
+      inputUsdPerMillionTokens: 0,
+      outputUsdPerMillionTokens: 0,
+    },
+  },
   {
     id: "claude-sonnet-4-6",
     provider: "anthropic",
@@ -69,4 +110,4 @@ export function findSupportedChatModel(modelId: string) {
   return SUPPORTED_CHAT_MODELS.find((model) => model.id === modelId);
 }
 
-export const DEFAULT_CHAT_MODEL_ID: SupportedChatModelId = "claude-opus-4-6";
+export const DEFAULT_CHAT_MODEL_ID: SupportedChatModelId = "gemini-flash-latest";
