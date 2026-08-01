@@ -16,6 +16,7 @@
     "@ai-sdk/openai": "^3.0.52",
     "@chopus/database": "workspace:*",
     "@chopus/shared": "workspace:*",
+    "@clerk/backend": "^3.15.0",
     "@hono/zod-validator": "^0.7.6",
     "ai": "^6.0.154",
     "dotenv": "^17.4.1",
