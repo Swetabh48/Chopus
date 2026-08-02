@@ -9,6 +9,8 @@ import type { AuthenticatedEnv } from "../middleware/require-auth";
 
 import { requireCreditsBalance } from "../middleware/require-credits-balance";
 import { isSupportedChatModel } from "../lib/models";
+import { findSupportedChatModel } from "@chopus/shared";
+import type { AuthenticatedEnv } from "../middleware/require-auth";
 
 const createSessionSchema = z.object({
   title: z.string(),

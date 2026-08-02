@@ -28,6 +28,9 @@ app.use("/billing/portal", requireAuth);
 const routes = app
   .route("/auth", auth)
   .route("/billing", billing)
+
+const routes = app
+  .route("/auth", auth)
   .route("/sessions", sessions)
   .route("/chat", chat);
 
