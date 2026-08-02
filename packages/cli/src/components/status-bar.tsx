@@ -1,7 +1,7 @@
 import { TextAttributes } from "@opentui/core";
 import { useTheme } from "../providers/theme";
 import { usePromptConfig } from "../providers/prompt-config";
-import { Mode } from "@chopus/database/enums";
+import { Mode } from "@chopus/shared";
 
 export function StatusBar() {
   const { mode, model } = usePromptConfig();

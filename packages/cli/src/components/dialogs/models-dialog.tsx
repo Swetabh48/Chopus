@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useDialog } from "../../providers/dialog";
 import { DialogSearchList } from "../dialog-search-list";
-import { Mode } from "@chopus/database/enums";
 import type { SupportedChatModelId } from "@chopus/shared";
 
 type ModelsDialogContentProps = {
