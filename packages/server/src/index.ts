@@ -20,7 +20,9 @@ app.onError((error, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
+app.use("/sessions", requireAuth);
 app.use("/sessions/*", requireAuth);
+app.use("/chat", requireAuth);
 app.use("/chat/*", requireAuth);
 app.use("/billing/checkout", requireAuth);
 app.use("/billing/portal", requireAuth);
