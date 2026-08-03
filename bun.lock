@@ -3,6 +3,9 @@
   "workspaces": {
     "": {
       "name": "Chopus",
+      "dependencies": {
+        "dotenv": "^17.4.2",
+      },
     },
     "packages/cli": {
       "name": "@chopus/cli",

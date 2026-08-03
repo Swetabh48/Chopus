@@ -1,10 +1,15 @@
 {
-  "name": "Chopus",
+  "name": "chopus",
   "version": "1.0.0",
   "workspaces": ["packages/*"],
   "scripts": {
     "dev:cli": "bun run --watch packages/cli/src/index.tsx",
-    "dev:server": "bun run --hot packages/server/src/index.ts"
+    "dev:server": "bun run --hot packages/server/src/index.ts",
+    "build:cli": "bun run --filter @chopus/cli build",
+    "link:cli": "bun run build:cli && cd packages/cli && bun link"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   },
   "overrides": {
     "ai": "6.0.184"
