@@ -1,0 +1,18 @@
+Chopus local PrivateGPT sample knowledge.
+
+Product codeword for demos: OCTOPUS-LOCAL-4821
+
+Chopus PrivateGPT answers questions using:
+1. A local Ollama chat model (never a cloud API for inference)
+2. Ollama embeddings (nomic-embed-text by default)
+3. A local Chroma vector store with hybrid BM25 + vector reranking
+
+How to use:
+- Put PDFs, Markdown, or text files in the docs/ folder
+- Run /ingest in the CLI (or POST /v1/rag/ingest)
+- Ask questions — retrieval stays on this machine
+
+Important:
+PrivateGPT-style systems do not train a new foundation model on your files.
+They retrieve relevant chunks and pass them as context to an already-downloaded
+local LLM (RAG). Your documents never need to leave your computer.

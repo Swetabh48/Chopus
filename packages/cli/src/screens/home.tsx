@@ -1,17 +1,30 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { TextAttributes } from "@opentui/core";
+import { Mode } from "@chopus/shared";
 import { Header } from "../components/header";
 import { InputBar } from "../components/input-bar";
 import { usePromptConfig } from "../providers/prompt-config";
-import { TextAttributes } from "@opentui/core";
 
 export function Home() {
   const navigate = useNavigate();
-  const { mode, model } = usePromptConfig();
+  const { mode, model, setMode } = usePromptConfig();
+
+  useEffect(() => {
+    if (mode === Mode.CHAT) {
+      setMode(Mode.BUILD);
+    }
+  }, [mode, setMode]);
 
   const handleSubmit = useCallback(
     (text: string) => {
-      navigate("/sessions/new", { state: { message: text, mode, model } });
+      navigate("/sessions/new", {
+        state: {
+          message: text,
+          mode: mode === Mode.CHAT ? Mode.BUILD : mode,
+          model,
+        },
+      });
     },
     [navigate, mode, model],
   );
@@ -32,8 +45,11 @@ export function Home() {
         <box flexDirection="row" gap={1} flexShrink={0} marginLeft="auto">
           <text>tab</text>
           <text attributes={TextAttributes.DIM}>agents</text>
+          <text attributes={TextAttributes.DIM}>·</text>
+          <text attributes={TextAttributes.DIM}>/chat</text>
+          <text attributes={TextAttributes.DIM}>PrivateGPT</text>
         </box>
       </box>
     </box>
   );
-};
+}

@@ -11,8 +11,6 @@
     "postinstall": "bun run --cwd ../database db:generate"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.68",
-    "@ai-sdk/google": "3.0.102",
     "@ai-sdk/openai": "^3.0.52",
     "@chopus/database": "workspace:*",
     "@chopus/shared": "workspace:*",

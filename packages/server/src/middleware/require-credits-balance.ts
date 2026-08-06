@@ -1,8 +1,32 @@
 import { createMiddleware } from "hono/factory";
+import { isOllamaChatModel } from "@chopus/shared";
 import type { AuthenticatedEnv } from "./require-auth";
-import { getAvailableCreditsBalance } from "../lib/polar";
+import { getAvailableCreditsBalance, isPolarConfigured } from "../lib/polar";
 
 export const requireCreditsBalance = createMiddleware<AuthenticatedEnv>(async (c, next) => {
+  // Local PrivateGPT / Ollama: no Polar account required.
+  if (!isPolarConfigured()) {
+    await next();
+    return;
+  }
+
+  // Peek at the body so local Ollama chats can skip Polar.
+  // Hono caches JSON bodies, so later validators can still read it.
+  let modelId: unknown;
+  try {
+    const body = await c.req.json();
+    if (body && typeof body === "object" && "model" in body) {
+      modelId = (body as { model?: unknown }).model;
+    }
+  } catch {
+    // Invalid JSON is handled by route validators.
+  }
+
+  if (typeof modelId === "string" && isOllamaChatModel(modelId)) {
+    await next();
+    return;
+  }
+
   try {
     const userId = c.get("userId");
     const creditsBalance = await getAvailableCreditsBalance(userId);

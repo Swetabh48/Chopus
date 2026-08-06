@@ -1,5 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { authenticateOAuthRequest } from "../lib/auth";
+import { isLocalMode, LOCAL_USER_ID } from "../lib/local-mode";
 
 export type AuthenticatedEnv = {
   Variables: {
@@ -8,6 +9,12 @@ export type AuthenticatedEnv = {
 };
 
 export const requireAuth = createMiddleware<AuthenticatedEnv>(async (c, next) => {
+  if (isLocalMode()) {
+    c.set("userId", LOCAL_USER_ID);
+    await next();
+    return;
+  }
+
   try {
     const auth = await authenticateOAuthRequest(c.req.raw);
     if (!auth) {
@@ -20,4 +27,3 @@ export const requireAuth = createMiddleware<AuthenticatedEnv>(async (c, next) =>
     return c.json({ error: "Unauthorized. Run /login to continue." }, 401);
   }
 });
-

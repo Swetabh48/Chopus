@@ -10,6 +10,14 @@ function getRequiredEnv(name: string) {
   return value;
 }
 
+export function isPolarConfigured() {
+  return Boolean(
+    process.env.POLAR_ACCESS_TOKEN &&
+      process.env.POLAR_PRODUCT_ID &&
+      process.env.POLAR_CREDITS_METER_ID,
+  );
+}
+
 export function getPolarAccessToken() {
   return getRequiredEnv("POLAR_ACCESS_TOKEN");
 }
@@ -35,10 +43,24 @@ export function getPolarServer(): PolarServer {
   return server;
 }
 
-const polar = new Polar({
-  accessToken: getPolarAccessToken(),
-  server: getPolarServer(),
-});
+let polarClient: Polar | null = null;
+
+function getPolarClient() {
+  if (!isPolarConfigured()) {
+    throw new Error(
+      "Polar billing is not configured. Set POLAR_ACCESS_TOKEN, POLAR_PRODUCT_ID, and POLAR_CREDITS_METER_ID, or use local Ollama models.",
+    );
+  }
+
+  if (!polarClient) {
+    polarClient = new Polar({
+      accessToken: getPolarAccessToken(),
+      server: getPolarServer(),
+    });
+  }
+
+  return polarClient;
+}
 
 function hasStatusCode(error: unknown): error is { statusCode: number } {
   return (
@@ -58,6 +80,7 @@ export async function createCheckoutUrl({
   customerExternalId,
   requestUrl,
 }: CreateCheckoutUrlParams) {
+  const polar = getPolarClient();
   const result = await polar.checkouts.create({
     products: [getPolarProductId()],
     successUrl: new URL("/billing/success", requestUrl).toString(),
@@ -66,21 +89,28 @@ export async function createCheckoutUrl({
   });
 
   return result.url;
-};
+}
 
 export async function createCustomerPortalUrl({
   customerExternalId,
   requestUrl,
 }: CreateCheckoutUrlParams) {
+  const polar = getPolarClient();
   const result = await polar.customerSessions.create({
     externalCustomerId: customerExternalId,
     returnUrl: new URL("/billing/success", requestUrl).toString(),
   });
 
   return result.customerPortalUrl;
-};
+}
 
 export async function getAvailableCreditsBalance(customerExternalId: string) {
+  if (!isPolarConfigured()) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const polar = getPolarClient();
+
   try {
     const customerState = await polar.customers.getStateExternal({
       externalId: customerExternalId,
@@ -103,7 +133,7 @@ export async function getAvailableCreditsBalance(customerExternalId: string) {
 
     throw error;
   }
-};
+}
 
 type IngestAiUsageParams = {
   externalCustomerId: string;
@@ -111,14 +141,16 @@ type IngestAiUsageParams = {
   credits: number;
 };
 
-export async function ingestAiUsage({ 
-  externalCustomerId, 
-  eventId, 
-  credits
+export async function ingestAiUsage({
+  externalCustomerId,
+  eventId,
+  credits,
 }: IngestAiUsageParams) {
-  if (credits <= 0) {
+  if (credits <= 0 || !isPolarConfigured()) {
     return;
   }
+
+  const polar = getPolarClient();
 
   await polar.events.ingest({
     events: [
@@ -130,4 +162,4 @@ export async function ingestAiUsage({
       },
     ],
   });
-};
+}

@@ -14,7 +14,14 @@ export function UserMessage({ message, mode }: Props) {
     <box width="100%" alignItems="center">
       <box
         border={["left"]}
-        borderColor={mode === Mode.PLAN ? colors.planMode : colors.primary}        width="100%"
+        borderColor={
+          mode === Mode.CHAT
+            ? colors.success
+            : mode === Mode.PLAN
+              ? colors.planMode
+              : colors.primary
+        }
+        width="100%"
         customBorderChars={{
           ...EmptyBorder,
           vertical: "┃",

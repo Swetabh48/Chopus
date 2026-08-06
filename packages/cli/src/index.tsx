@@ -5,6 +5,7 @@ import { RootLayout } from "./layouts/root-layout";
 import { Home } from "./screens/home";
 import { NewSession } from "./screens/new-session";
 import { Session } from "./screens/session";
+import { PrivateGptHome } from "./screens/private-gpt";
 
 const router = createMemoryRouter([
   {
@@ -12,14 +13,15 @@ const router = createMemoryRouter([
     element: <RootLayout />,
     children: [
       { index: true, element: <Home /> },
+      { path: "chat", element: <PrivateGptHome /> },
       { path: "sessions/new", element: <NewSession /> },
       { path: "sessions/:id", element: <Session /> },
-    ]
-  }
+    ],
+  },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }
 
 const renderer = await createCliRenderer({

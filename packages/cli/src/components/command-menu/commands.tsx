@@ -1,6 +1,8 @@
-import { SUPPORTED_CHAT_MODELS } from "@chopus/shared";
+import { Mode, SUPPORTED_CHAT_MODELS } from "@chopus/shared";
 import { 
   AgentsDialogContent,
+  DocsDialogContent,
+  IngestDialogContent,
   ModelsDialogContent,
   SessionsDialogContent,
   ThemeDialogContent,
@@ -9,16 +11,35 @@ import type { Command } from "./types";
 
 import { performLogin } from "../../lib/oauth";
 import { clearAuth } from "../../lib/auth";
+import { clearLocalDocuments } from "../../lib/local-ai";
 
 import { openBillingPortal, openUpgradeCheckout } from "../../lib/upgrade";
 
 export const COMMANDS: Command[] = [
   {
+    name: "chat",
+    description: "Open PrivateGPT (local docs Q&A, no coding tools)",
+    value: "/chat",
+    action: (ctx) => {
+      ctx.setMode(Mode.CHAT);
+      ctx.navigate("/chat");
+    },
+  },
+  {
+    name: "agent",
+    description: "Open coding agent (Build/Plan tools)",
+    value: "/agent",
+    action: (ctx) => {
+      ctx.setMode(Mode.BUILD);
+      ctx.navigate("/");
+    },
+  },
+  {
     name: "new",
     description: "Start a new conversation",
     value: "/new",
     action: (ctx) => {
-      ctx.navigate("/");
+      ctx.navigate(ctx.mode === Mode.CHAT ? "/chat" : "/");
     },
   },
   {
@@ -26,6 +47,12 @@ export const COMMANDS: Command[] = [
     description: "Switch agents",
     value: "/agents",
     action: (ctx) => {
+      if (ctx.mode === Mode.CHAT) {
+        ctx.toast.show({
+          message: "PrivateGPT has no agents. Use /agent for Build/Plan.",
+        });
+        return;
+      }
       ctx.dialog.open({
         title: "Select Agent",
         children: <AgentsDialogContent currentMode={ctx.mode} onSelectMode={ctx.setMode} />,
@@ -60,6 +87,48 @@ export const COMMANDS: Command[] = [
     },
   },
   {
+    name: "ingest",
+    description: "Ingest local PDFs/Markdown/text into private RAG",
+    value: "/ingest",
+    action: (ctx) => {
+      ctx.dialog.open({
+        title: "Ingest Documents",
+        children: <IngestDialogContent />,
+      });
+    },
+  },
+  {
+    name: "docs",
+    description: "List documents in the local knowledge base",
+    value: "/docs",
+    action: (ctx) => {
+      ctx.dialog.open({
+        title: "Local Documents",
+        children: <DocsDialogContent />,
+      });
+    },
+  },
+  {
+    name: "forget",
+    description: "Clear the local RAG knowledge base",
+    value: "/forget",
+    action: async (ctx) => {
+      ctx.toast.show({ message: "Clearing local documents..." });
+      try {
+        const result = await clearLocalDocuments();
+        ctx.toast.show({
+          variant: "success",
+          message: `Cleared ${result.deleted_chunks} chunk(s)`,
+        });
+      } catch (error) {
+        ctx.toast.show({
+          variant: "error",
+          message: error instanceof Error ? error.message : "Failed to clear documents",
+        });
+      }
+    },
+  },
+  {
     name: "theme",
     description: "Change color theme",
     value: "/theme",
@@ -74,6 +143,7 @@ export const COMMANDS: Command[] = [
     name: "login",
     description: "Sign in with your browser",
     value: "/login",
+    cloudOnly: true,
     action: async (ctx) => {
       ctx.toast.show({ message: "Opening browser to sign in..." });
 
@@ -93,6 +163,7 @@ export const COMMANDS: Command[] = [
     name: "logout",
     description: "Sign out of your account",
     value: "/logout",
+    cloudOnly: true,
     action: (ctx) => {
       clearAuth();
       ctx.toast.show({ variant: "success", message: "Signed out" });
@@ -102,6 +173,7 @@ export const COMMANDS: Command[] = [
     name: "upgrade",
     description: "Buy more credits",
     value: "/upgrade",
+    cloudOnly: true,
     action: async (ctx) => {
       ctx.toast.show({ message: "Opening credits checkout..." });
 
@@ -121,6 +193,7 @@ export const COMMANDS: Command[] = [
     name: "usage",
     description: "Open billing portal in your browser",
     value: "/usage",
+    cloudOnly: true,
     action: async (ctx) => {
       ctx.toast.show({ message: "Opening billing portal..." });
 

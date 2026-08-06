@@ -61,7 +61,8 @@ const app = new Hono<AuthenticatedEnv>()
 
     return c.json(session);
   })
-  .post("/", requireCreditsBalance, createSessionValidator, async (c) => {
+  .post("/", createSessionValidator, async (c) => {
+    // Session shells are free; cloud usage is billed on /chat with a model.
     // MOCK: Uncomment to simulate slow session loading
     // await new Promise((r) => setTimeout(r, 5000))
 

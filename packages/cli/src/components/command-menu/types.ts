@@ -16,5 +16,7 @@ export type Command = {
   name: string;
   description: string;
   value: string;
+  /** Hide when LOCAL_MODE=true (Clerk/Polar leftovers). */
+  cloudOnly?: boolean;
   action?: (ctx: CommandContext) => void | Promise<void>;
 };
