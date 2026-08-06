@@ -1,21 +1,31 @@
-import type { ModeType } from "@chopus/shared";
+import { Mode, type ModeType } from "@chopus/shared";
 
 type SystemPromptParams = {
   mode: ModeType;
 };
 
-export function buildSystemPrompt({ 
-  mode
-}: SystemPromptParams): string {
+export function buildSystemPrompt({ mode }: SystemPromptParams): string {
+  if (mode === Mode.CHAT) {
+    return `You are Chopus PrivateGPT — a fully local private AI assistant.
+
+Rules:
+- Answer directly and helpfully. Do NOT use tools, shell commands, or browse the web.
+- Never invent file edits or pretend to run code.
+- If retrieved document context is present in the conversation, prefer that context and say when something is unknown.
+- Keep answers concise unless the user asks for detail.
+- You run entirely on the user's machine via Ollama; no cloud APIs.`;
+  }
+
   const parts: string[] = [];
 
   parts.push(`You are an expert software engineer working as a coding assistant inside a terminal application.
 
-  The application has two modes the user can switch between:
+  The application has two agent modes the user can switch between:
   - **PLAN** — Read-only analysis and planning. No file modifications.
-  - **BUILD** — Full implementation with read and write tools.`);
+  - **BUILD** — Full implementation with read and write tools.
+  There is also a separate **CHAT** PrivateGPT mode (no tools) entered via /chat.`);
 
-  if (mode === "PLAN") {
+  if (mode === Mode.PLAN) {
     parts.push(`
     ## Mode: PLAN
     You are in planning mode. Your job is to analyze, research, and propose solutions — but NOT make changes.
@@ -32,7 +42,7 @@ export function buildSystemPrompt({
     - After making changes, verify the work when possible`);
   }
 
-  if (mode === "PLAN") {
+  if (mode === Mode.PLAN) {
     parts.push(`
     ## Tool Usage
     You have these tools available:
@@ -47,7 +57,7 @@ export function buildSystemPrompt({
     3. **Batch your tool calls.** Call multiple tools in parallel when possible (e.g. read 5 files at once, not one at a time).`);
   }
 
-    if (mode === "BUILD") {
+  if (mode === Mode.BUILD) {
     parts.push(`
     ## Tool Usage
     You have these tools available:
@@ -66,4 +76,4 @@ export function buildSystemPrompt({
   }
 
   return parts.join("\n");
-};
+}

@@ -8,7 +8,12 @@ type Props = {
 
 export function Spinner({ mode = Mode.BUILD }: Props) {
   const { colors } = useTheme();
-  const activeColor = mode === Mode.PLAN ? colors.planMode : colors.primary;
+  const activeColor =
+    mode === Mode.CHAT
+      ? colors.success
+      : mode === Mode.PLAN
+        ? colors.planMode
+        : colors.primary;
 
   return <spinner name="aesthetic" color={activeColor} />;
 };

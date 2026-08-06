@@ -1,19 +1,31 @@
 import { createClerkClient } from "@clerk/backend";
+import { isLocalMode, LOCAL_USER_ID } from "./local-mode";
 
-if (!process.env.CLERK_SECRET_KEY) {
-  throw new Error("CLERK_SECRET_KEY environment variable is required");
+const clerkClient =
+  !isLocalMode() &&
+  process.env.CLERK_SECRET_KEY &&
+  process.env.CLERK_PUBLISHABLE_KEY
+    ? createClerkClient({
+        secretKey: process.env.CLERK_SECRET_KEY,
+        publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+      })
+    : null;
+
+if (!isLocalMode() && !clerkClient) {
+  throw new Error(
+    "CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY are required unless LOCAL_MODE=true",
+  );
 }
-
-if (!process.env.CLERK_PUBLISHABLE_KEY) {
-  throw new Error("CLERK_PUBLISHABLE_KEY environment variable is required");
-}
-
-const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-});
 
 export async function authenticateOAuthRequest(request: Request) {
+  if (isLocalMode()) {
+    return { userId: LOCAL_USER_ID };
+  }
+
+  if (!clerkClient) {
+    return null;
+  }
+
   const requestState = await clerkClient.authenticateRequest(request, {
     acceptsToken: "oauth_token",
   });
@@ -28,4 +40,4 @@ export async function authenticateOAuthRequest(request: Request) {
   }
 
   return { userId: auth.userId };
-};
+}

@@ -34,7 +34,11 @@ export function PromptConfigProvider({ children }: PromptConfigProviderProps) {
   const [model, setModel] = useState<SupportedChatModelId>(DEFAULT_CHAT_MODEL_ID);
 
   const toggleMode = useCallback(() => {
-    setMode((m) => (m === Mode.BUILD ? Mode.PLAN : Mode.BUILD));
+    setMode((m) => {
+      // PrivateGPT chat is its own screen — Tab only toggles agent modes.
+      if (m === Mode.CHAT) return Mode.CHAT;
+      return m === Mode.BUILD ? Mode.PLAN : Mode.BUILD;
+    });
   }, []);
 
   return (

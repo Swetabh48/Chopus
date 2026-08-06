@@ -27,6 +27,10 @@ function truncate(value: string, limit: number) {
 }
 
 export async function executeLocalTool(toolName: string, input: unknown, mode: ModeType) {
+  if (mode === Mode.CHAT) {
+    throw new Error("Tools are disabled in PrivateGPT chat mode");
+  }
+
   if (mode === Mode.PLAN && !["readFile", "listDirectory", "glob", "grep"].includes(toolName)) {
     throw new Error(`Tool ${toolName} is not available in PLAN mode`);
   }

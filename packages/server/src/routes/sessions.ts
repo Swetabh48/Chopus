@@ -5,8 +5,6 @@ import { z } from "zod";
 import { db } from "@chopus/database/client";
 
 import type { AuthenticatedEnv } from "../middleware/require-auth";
-import { requireCreditsBalance } from "../middleware/require-credits-balance";
-
 
 const createSessionSchema = z.object({
   title: z.string(),
@@ -58,7 +56,8 @@ const app = new Hono<AuthenticatedEnv>()
 
     return c.json(session);
   })
-  .post("/", requireCreditsBalance, createSessionValidator, async (c) => {
+  .post("/", createSessionValidator, async (c) => {
+    // Session shells are free; cloud usage is billed on /chat with a model.
     // MOCK: Uncomment to simulate slow session loading
     // await new Promise((r) => setTimeout(r, 5000))
 

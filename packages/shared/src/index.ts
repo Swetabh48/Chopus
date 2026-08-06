@@ -2,6 +2,7 @@ export {
   SUPPORTED_CHAT_MODELS,
   DEFAULT_CHAT_MODEL_ID,
   findSupportedChatModel,
+  isOllamaChatModel,
   type ModelPricing,
   type SupportedProvider,
   type SupportedChatModel,

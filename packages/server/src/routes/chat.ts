@@ -13,6 +13,7 @@ import { db } from "@chopus/database/client";
 import type { Prisma } from "@chopus/database";
 import { 
   getToolContracts, 
+  isOllamaChatModel,
   modeSchema, 
   type ModeType, 
   type ToolContracts
@@ -82,6 +83,7 @@ const app = new Hono<AuthenticatedEnv>()
 
       const startTime = Date.now();
       const tools = getToolContracts(mode);
+      const hasTools = Object.keys(tools).length > 0;
       const resolvedModel = resolveChatModel(model);
       const previousMessages = Array.isArray(session.messages)
         ? (session.messages as unknown as ChopusUIMessage[])
@@ -105,17 +107,19 @@ const app = new Hono<AuthenticatedEnv>()
 
       const nextMessages = await validateUIMessages<ChopusUIMessage>({
         messages: mergedMessages,
-        tools,
+        ...(hasTools ? { tools } : {}),
       });
-      const modelMessages = await convertToModelMessages(nextMessages, { tools });
+      const modelMessages = await convertToModelMessages(
+        nextMessages,
+        hasTools ? { tools } : undefined,
+      );
       let completedUsage: LanguageModelUsage | null = null;
 
       const result = streamText({
         model: resolvedModel.model,
         system: buildSystemPrompt({ mode }),
         messages: modelMessages,
-        tools,
-        providerOptions: resolvedModel.providerOptions,
+        ...(hasTools ? { tools } : {}),
         onFinish(event) {
           completedUsage = event.totalUsage;
         },
@@ -150,6 +154,11 @@ const app = new Hono<AuthenticatedEnv>()
           });
 
           if (!completedUsage) return;
+
+          // Local Ollama usage is free — do not ingest Polar credits.
+          if (resolvedModel.provider === "ollama" || isOllamaChatModel(model)) {
+            return;
+          }
 
           try {
             const billableUsage = calculateCreditsForUsage({

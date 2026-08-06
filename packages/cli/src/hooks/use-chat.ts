@@ -67,6 +67,16 @@ export function useChat(sessionId: string, initialMessages: Message[]) {
     onToolCall({ toolCall }) {
       const mode = chat.messages.at(-1)?.metadata?.mode ?? "BUILD";
 
+      if (mode === "CHAT") {
+        void chat.addToolOutput({
+          tool: toolCall.toolName as keyof ChatTools,
+          toolCallId: toolCall.toolCallId,
+          state: "output-error",
+          errorText: "Tools are disabled in PrivateGPT chat mode. Use /agent for coding tools.",
+        });
+        return;
+      }
+
       void executeLocalTool(toolCall.toolName, toolCall.input, mode)
         .then((output) =>
           chat.addToolOutput({

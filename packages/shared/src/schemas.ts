@@ -4,9 +4,11 @@ import { tool } from "ai";
 export const Mode = {
   BUILD: "BUILD",
   PLAN: "PLAN",
+  /** PrivateGPT Q&A — local model + docs, no coding tools */
+  CHAT: "CHAT",
 } as const;
 
-export const modeSchema = z.enum([Mode.BUILD, Mode.PLAN]);
+export const modeSchema = z.enum([Mode.BUILD, Mode.PLAN, Mode.CHAT]);
 
 export type ModeType = (typeof Mode)[keyof typeof Mode];
 
@@ -38,7 +40,8 @@ export const toolInputSchemas = {
   bash: z.object({
     command: z.string().describe("Shell command to run"),
     description: z.string().optional().describe("Short description of the command"),
-    timeout: z.number().optional().describe("Timeout in milliseconds"),
+    // Models often send timeout as a string — coerce so local tools don't crash.
+    timeout: z.coerce.number().optional().describe("Timeout in milliseconds"),
   }),
 } as const;
 
@@ -81,7 +84,8 @@ export const buildToolContracts = {
 export type ToolContracts = typeof buildToolContracts;
 
 export function getToolContracts(mode: ModeType) {
-  return mode === Mode.PLAN 
-    ? readOnlyToolContracts 
-    : buildToolContracts;
-};
+  if (mode === Mode.CHAT) {
+    return {};
+  }
+  return mode === Mode.PLAN ? readOnlyToolContracts : buildToolContracts;
+}
